@@ -1,0 +1,20 @@
+{
+  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/content-selection-module/^1.0.0/components/context.jsonld",
+  "@graph": [
+    {
+      "comment": "A Content-Selection instance",
+      "@type": "ContentSelection",
+      "@id": "urn:my-content-selection:core:ContentSelection",
+      "redirects": [
+        {
+          "ContentSelection:_redirects_key": "/from/(.*)",
+          "ContentSelection:_redirects_value": "/to/$1"
+        }
+      ],
+      "baseUrl": { "@id": "urn:solid-server:default:variable:baseUrl" },
+      "targetExtractor": { "@id": "urn:solid-server:default:TargetExtractor" },
+      "responseWriter": { "@id": "urn:solid-server:default:ResponseWriter" },
+      "statusCode": "303"
+    }
+  ]
+}
