@@ -2,19 +2,20 @@
 
 ultimate goal: replicate behavior of [Apache Module **mod_negotiation**](https://httpd.apache.org/docs/2.4/mod/mod_negotiation.html) in specific Solid containers
 
-### PoC development steps
+The component project is based on the [hello-world-component](https://github.com/CommunitySolidServer/hello-world-component) and the [RedirectingHttpHandler](https://communitysolidserver.github.io/CommunitySolidServer/7.x/docs/classes/RedirectingHttpHandler.html) class of the [CSS](https://github.com/CommunitySolidServer/CommunitySolidServer).
 
-1. inject own module into CSS
-2. redirect based on requested `content-type` header
-    1. hard-coded "type map" and redirect paths
-    2. config values
-3. select und directly return the document that best matches the request
-
-
-## Setup
+### Setup
 
 `npm i`
 
 `npm run build`
 
 `npm start`
+
+### Open discussion
+
+* if no match between accept and type mappings
+  * currently: component not active -> 404 Not Found
+  * possible alternative: return error 406 Not Acceptable
+
+* redirect vs directly return the document that best matches the request

@@ -41,6 +41,10 @@
       "comment": "A Content-Selection instance",
       "@type": "ContentSelection",
       "@id": "urn:my-content-selection:core:ContentSelection",
+      "activePaths": [
+        "^/sensor-[123]/(.*)",
+        "^/raspi/sensor/data$"
+      ],
       "typeMappings": [
         {
           "ContentSelection:_typeMappings_key": "text/csv",
@@ -64,6 +68,8 @@
         }
       ],
       "statusCode": "303",
+      "baseUrl": { "@id": "urn:solid-server:default:variable:baseUrl" },
+      "targetExtractor": { "@id": "urn:solid-server:default:TargetExtractor" },
       "responseWriter": { "@id": "urn:solid-server:default:ResponseWriter" }
     },
     {

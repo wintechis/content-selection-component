@@ -1,10 +1,12 @@
 import type {
+  TargetExtractor,
   ResponseWriter,
   HttpHandlerInput,
   HttpRequest
 } from '@solid/community-server';
 import {
   getLoggerFor,
+  getRelativeUrl,
   RedirectHttpError, 
   NotImplementedHttpError, MethodNotAllowedHttpError, BadRequestHttpError, 
   AcceptPreferenceParser,
@@ -24,10 +26,12 @@ const redirectErrorFactories: Record<301 | 302 | 303 | 307 | 308, (location: str
 
 /**
  * Handler that redirects to specified file extensions 
- * based on the MIME types in the request's 'accept' header.
+ * based on the MIME types in the request's 'accept' header
+ * for specified server paths.
  */
 export class ContentSelection extends HttpHandler {
   private readonly logger = getLoggerFor(this);
+  private readonly activePaths: RegExp[];
   private readonly typeMappings: {
     mimeType: RegExp;
     fileExtension: string;
@@ -37,38 +41,53 @@ export class ContentSelection extends HttpHandler {
   /**
    * Creates a handler for the provided redirects.
    *
+   * @param activePaths - Server paths where the component is active.
+   * @param baseUrl - Base URL of the server.
+   * @param targetExtractor - To extract the target from the request.
    * @param typeMappings - A mapping between MIME type RegEx and file extensions.
    * @param statusCode - Desired 30x redirection code (defaults to 307).
    * @param responseWriter - To write the redirect to the response.
    */
   public constructor(
+    activePaths: string[],
+    private readonly baseUrl: string,
+    private readonly targetExtractor: TargetExtractor,
     typeMappings: Record<string, string>,
     private readonly statusCode: 301 | 302 | 303 | 307 | 308 = 307,
     private readonly responseWriter: ResponseWriter,
   ) {
     super();
 
+    this.activePaths = activePaths.map(pathExp => new RegExp(pathExp, 'i'));
     // Create an array of {mimeType,fileExtension} objects
     this.typeMappings = Object.keys(typeMappings).map(
       (pattern): { mimeType: RegExp; fileExtension: string } => ({
-        mimeType: new RegExp(pattern, ''),
+        mimeType: new RegExp(pattern, 'i'),
         fileExtension: typeMappings[pattern].startsWith('.') ? typeMappings[pattern] : `.${typeMappings[pattern]}`,
       }),
     );
   }
 
   public async canHandle({ request }: HttpHandlerInput): Promise<void> {
-    // Only for HTTP GET
+    // Condition 1: only HTTP GET
     if (request.method !== 'GET') {
       throw new MethodNotAllowedHttpError(['GET'], 'Content selection redirect only for GET requests.');
     }
 
-    // Only for files without extension
+    // Condition 3: only specified paths
+    // Retrieve target relative to base URL
+    const target = await getRelativeUrl(this.baseUrl, request, this.targetExtractor);
+    // Match against specified paths
+    if (!this.activePaths.some(pathRegex => pathRegex.test(target))) {
+      throw new NotImplementedHttpError(`No redirect configured for ${target}`);
+    }
+
+    // Condition 4: only files/paths without extension
     if (!request.url || request.url.endsWith('/') || this.hasFileExtension(request.url)) {
       throw new BadRequestHttpError('Content selection redirect only for files without extensions.');
     }
 
-    // Try to find redirect for target URL
+    // Condition 5: only if match between accept header and type mappings
     await this.findRedirect(request);
   }
 
