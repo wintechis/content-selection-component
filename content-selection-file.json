@@ -47,16 +47,16 @@
       ],
       "typeMappings": [
         {
-          "ContentSelection:_typeMappings_key": "text/csv",
-          "ContentSelection:_typeMappings_value": ".csv"          
-        },
-        {
           "ContentSelection:_typeMappings_key": "text/html",
           "ContentSelection:_typeMappings_value": ".html"          
         },
         {
-          "ContentSelection:_typeMappings_key": "text/turtle",
-          "ContentSelection:_typeMappings_value": ".ttl"          
+          "ContentSelection:_typeMappings_key": "text/csv",
+          "ContentSelection:_typeMappings_value": ".csv"          
+        },
+        {
+          "ContentSelection:_typeMappings_key": "text/(turtle|\\*)",
+          "ContentSelection:_typeMappings_value": "ttl"          
         },
         {
           "ContentSelection:_typeMappings_key": "application/json(.*)",

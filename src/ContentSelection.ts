@@ -2,7 +2,9 @@ import type {
   TargetExtractor,
   ResponseWriter,
   HttpHandlerInput,
-  HttpRequest
+  HttpRequest,
+  ValuePreferences,
+  RepresentationPreferences
 } from '@solid/community-server';
 import {
   getLoggerFor,
@@ -10,9 +12,11 @@ import {
   RedirectHttpError, 
   NotImplementedHttpError, MethodNotAllowedHttpError, BadRequestHttpError, 
   AcceptPreferenceParser,
+  ResponseDescription,
   HttpHandler
 } from '@solid/community-server';
 import { RedirectResponseDescription } from './RedirectResponseDescription';
+import { NotAcceptableHttpError } from './NotAcceptableHttpError';
 
 /* eslint-disable ts/naming-convention */
 const redirectErrorFactories: Record<301 | 302 | 303 | 307 | 308, (location: string) => RedirectHttpError> = {
@@ -87,8 +91,8 @@ export class ContentSelection extends HttpHandler {
       throw new BadRequestHttpError('Content selection redirect only for files without extensions.');
     }
 
-    // Condition 5: only if match between accept header and type mappings
-    await this.findRedirect(request);
+    // // Condition 5: only if match between accept header and type mappings
+    // await this.findRedirect(request);
   }
 
   private hasFileExtension(url: string): Boolean {
@@ -97,11 +101,25 @@ export class ContentSelection extends HttpHandler {
 
   public async handle({ request, response }: HttpHandlerInput): Promise<void> {
     // Try to find redirect for target URL
-    const redirect = await this.findRedirect(request);
+    let redirect,result;
+    try {
+      redirect = await this.findRedirect(request);
 
-    // Send redirect response
-    this.logger.info(`Redirecting ${request.url} to ${redirect}`);
-    const result = new RedirectResponseDescription(redirectErrorFactories[this.statusCode](redirect));
+      // Send redirect response
+      this.logger.info(`Redirecting ${request.url} to ${redirect}`);
+      result = new RedirectResponseDescription(redirectErrorFactories[this.statusCode](redirect));
+
+    } catch (error) {
+      // No mapping matches the accept preference
+      if (error instanceof NotAcceptableHttpError) {
+         // Send error response
+        this.logger.info(error.message);
+        // TODO: subclass of ResponseDescription that add header for possible MIME types
+        result = new ResponseDescription(error.statusCode);
+      } else {
+        throw error;
+      }
+    }
     await this.responseWriter.handleSafe({ response, result });
   }
 
@@ -110,33 +128,54 @@ export class ContentSelection extends HttpHandler {
     // 1. Process 'accept' header
     const acceptHeaderContent = request.headers.accept;
     this.logger.info(`Accept: ${acceptHeaderContent || 'none'}`);
-
-    const DEFAULT_MIME_TYPE = {'*/*': 1};
     const preferences = await this.acceptPreferenceParser.handle({ request });
-    const highestPrefMimeType = Object.keys(preferences.type || DEFAULT_MIME_TYPE)[0];
 
-    // 2. Decide the redirect
     console.log(preferences);
     console.log(this.typeMappings);
 
-    // 2.1 Find match between accept header and type mappings found
-    let result;
-    for (const { mimeType, fileExtension } of this.typeMappings) {
-      const match = mimeType.exec(highestPrefMimeType);
-      if (match) {
-        result = { match, fileExtension };
-        break;
-      }
-    }
-
-    // 2.2 Only redirect if match found
-    if (!result) {
-      throw new NotImplementedHttpError(`No type mapping configured for ${highestPrefMimeType}`);
-    }
+    // 2 Find match between accept header and type mappings found
+    const result = this.matchWithTypeMappings(this.getPreferencesTypes(preferences));
 
     // 3. Build and return redirect URL
     const redirectURL = request.url + result.fileExtension;
 
     return redirectURL;
+  }
+
+  private getPreferencesTypes(preferences: RepresentationPreferences): ValuePreferences {
+    const DEFAULT_MIME_TYPE = {'*/*': 1};
+    return preferences.type !== undefined ? preferences.type : DEFAULT_MIME_TYPE;
+  }
+
+  private matchWithTypeMappings(acceptTypes: ValuePreferences) {
+    let result: { 
+      match: RegExpMatchArray, 
+      fileExtension: string 
+    } | undefined = undefined;
+
+    // hack to keep order (Object.keys reverses the order in Node?)
+    // caution: order of object keys depends on the implementation
+    const acceptTypesList = Object.keys(acceptTypes).reverse();
+
+    // Loop over accepted types in the request
+    for (let i = 0; i < acceptTypesList.length; i++) {
+      const acceptType = acceptTypesList[i];
+      // Loop over configured type mappings
+      for (const { mimeType, fileExtension } of this.typeMappings) {
+        const match = mimeType.exec(acceptType);
+        if (match) {
+          result = { match, fileExtension };
+          break;
+        }
+      }
+    }
+
+    // Error if no matches at all
+    if (!result) {
+      throw new NotAcceptableHttpError(
+        `No type mapping configured for '${acceptTypesList.join(',')}'`);
+    }
+
+    return result;
   }
 }

@@ -15,7 +15,7 @@ The component project is based on the [hello-world-component](https://github.com
 ### Open discussion
 
 * if no match between accept and type mappings
-  * currently: component not active -> 404 Not Found
-  * possible alternative: return error 406 Not Acceptable
+  * currently: return error 406 Not Acceptable (TODO: header for possible types)
+  * alternative: component not active -> 404 Not Found
 
 * redirect vs directly return the document that best matches the request
