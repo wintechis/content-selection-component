@@ -1,5 +1,4 @@
 import type {
-  TargetExtractor,
   ResponseWriter,
   HttpHandlerInput,
   HttpRequest
@@ -7,8 +6,8 @@ import type {
 import {
   getLoggerFor,
   RedirectHttpError, 
-  NotImplementedHttpError,
-  getRelativeUrl, joinUrl,
+  NotImplementedHttpError, MethodNotAllowedHttpError, BadRequestHttpError, 
+  AcceptPreferenceParser,
   HttpHandler
 } from '@solid/community-server';
 import { RedirectResponseDescription } from './RedirectResponseDescription';
@@ -24,46 +23,57 @@ const redirectErrorFactories: Record<301 | 302 | 303 | 307 | 308, (location: str
 /* eslint-enable ts/naming-convention */
 
 /**
- * Handler that redirects paths matching given patterns
- * to their corresponding URL, substituting selected groups.
+ * Handler that redirects to specified file extensions 
+ * based on the MIME types in the request's 'accept' header.
  */
 export class ContentSelection extends HttpHandler {
   private readonly logger = getLoggerFor(this);
-  private readonly redirects: {
-    regex: RegExp;
-    redirectPattern: string;
+  private readonly typeMappings: {
+    mimeType: RegExp;
+    fileExtension: string;
   }[];
+  private readonly acceptPreferenceParser = new AcceptPreferenceParser();
 
   /**
    * Creates a handler for the provided redirects.
    *
-   * @param redirects - A mapping between URL patterns.
-   * @param baseUrl - Base URL of the server.
-   * @param targetExtractor - To extract the target from the request.
+   * @param typeMappings - A mapping between MIME type RegEx and file extensions.
+   * @param statusCode - Desired 30x redirection code (defaults to 307).
    * @param responseWriter - To write the redirect to the response.
-   * @param statusCode - Desired 30x redirection code (defaults to 308).
    */
   public constructor(
-    redirects: Record<string, string>,
-    private readonly baseUrl: string,
-    private readonly targetExtractor: TargetExtractor,
+    typeMappings: Record<string, string>,
+    private readonly statusCode: 301 | 302 | 303 | 307 | 308 = 307,
     private readonly responseWriter: ResponseWriter,
-    private readonly statusCode: 301 | 302 | 303 | 307 | 308 = 308,
   ) {
     super();
 
-    // Create an array of (regexp, redirect) pairs
-    this.redirects = Object.keys(redirects).map(
-      (pattern): { regex: RegExp; redirectPattern: string } => ({
-        regex: new RegExp(pattern, ''),
-        redirectPattern: redirects[pattern],
+    // Create an array of {mimeType,fileExtension} objects
+    this.typeMappings = Object.keys(typeMappings).map(
+      (pattern): { mimeType: RegExp; fileExtension: string } => ({
+        mimeType: new RegExp(pattern, ''),
+        fileExtension: typeMappings[pattern].startsWith('.') ? typeMappings[pattern] : `.${typeMappings[pattern]}`,
       }),
     );
   }
 
   public async canHandle({ request }: HttpHandlerInput): Promise<void> {
+    // Only for HTTP GET
+    if (request.method !== 'GET') {
+      throw new MethodNotAllowedHttpError(['GET'], 'Content selection redirect only for GET requests.');
+    }
+
+    // Only for files without extension
+    if (!request.url || request.url.endsWith('/') || this.hasFileExtension(request.url)) {
+      throw new BadRequestHttpError('Content selection redirect only for files without extensions.');
+    }
+
     // Try to find redirect for target URL
     await this.findRedirect(request);
+  }
+
+  private hasFileExtension(url: string): Boolean {
+    return url.substring(url.lastIndexOf('/')+1).includes('.');
   }
 
   public async handle({ request, response }: HttpHandlerInput): Promise<void> {
@@ -77,36 +87,37 @@ export class ContentSelection extends HttpHandler {
   }
 
   private async findRedirect(request: HttpRequest): Promise<string> {
-    // Retrieve target relative to base URL
-    const target = await getRelativeUrl(this.baseUrl, request, this.targetExtractor);
 
-    // Get groups and redirect of first matching pattern
+    // 1. Process 'accept' header
+    const acceptHeaderContent = request.headers.accept;
+    this.logger.info(`Accept: ${acceptHeaderContent || 'none'}`);
+
+    const DEFAULT_MIME_TYPE = {'*/*': 1};
+    const preferences = await this.acceptPreferenceParser.handle({ request });
+    const highestPrefMimeType = Object.keys(preferences.type || DEFAULT_MIME_TYPE)[0];
+
+    // 2. Decide the redirect
+    console.log(preferences);
+    console.log(this.typeMappings);
+
+    // 2.1 Find match between accept header and type mappings found
     let result;
-    for (const { regex, redirectPattern } of this.redirects) {
-      const match = regex.exec(target);
+    for (const { mimeType, fileExtension } of this.typeMappings) {
+      const match = mimeType.exec(highestPrefMimeType);
       if (match) {
-        result = { match, redirectPattern };
+        result = { match, fileExtension };
         break;
       }
     }
 
-    // Only return if a redirect is configured for the requested URL
+    // 2.2 Only redirect if match found
     if (!result) {
-      throw new NotImplementedHttpError(`No redirect configured for ${target}`);
+      throw new NotImplementedHttpError(`No type mapping configured for ${highestPrefMimeType}`);
     }
 
-    // Build redirect URL from regexp result
-    const { match, redirectPattern } = result;
-    let redirect = redirectPattern;
-    for (const [ i, element ] of match.entries()) {
-      redirect = redirect.replace(`$${i}`, element);
-    }
+    // 3. Build and return redirect URL
+    const redirectURL = request.url + result.fileExtension;
 
-    // Don't redirect if target is already correct
-    if (redirect === target) {
-      throw new NotImplementedHttpError('Target is already correct.');
-    }
-
-    return /^(?:[a-z]+:)?\/\//ui.test(redirect) ? redirect : joinUrl(this.baseUrl, redirect);
+    return redirectURL;
   }
 }
