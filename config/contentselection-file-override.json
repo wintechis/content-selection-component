@@ -1,0 +1,120 @@
+{
+  "@context": [
+    "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^7.0.0/components/context.jsonld",
+    "https://linkedsoftwaredependencies.org/bundles/npm/content-selection-module/^1.0.0/components/context.jsonld"
+  ],
+  "import": [
+    "css:config/app/init/static-root.json",
+    "css:config/app/main/default.json",
+    "css:config/app/variables/default.json",
+    "css:config/http/handler/default.json",
+    "css:config/http/middleware/default.json",
+    "css:config/http/notifications/all.json",
+    "css:config/http/server-factory/http.json",
+    "css:config/http/static/default.json",
+    "css:config/identity/access/public.json",
+    "css:config/identity/email/default.json",
+    "css:config/identity/handler/default.json",
+    "css:config/identity/oidc/default.json",
+    "css:config/identity/ownership/token.json",
+    "css:config/identity/pod/static.json",
+    "css:config/ldp/authentication/dpop-bearer.json",
+    "css:config/ldp/authorization/allow-all.json",
+    "css:config/ldp/handler/default.json",
+    "css:config/ldp/metadata-parser/default.json",
+    "css:config/ldp/metadata-writer/default.json",
+    "css:config/ldp/modes/default.json",
+    "css:config/storage/backend/file.json",
+    "css:config/storage/key-value/resource-store.json",
+    "css:config/storage/location/pod.json",
+    "css:config/storage/middleware/default.json",
+    "css:config/util/auxiliary/acl.json",
+    "css:config/util/identifiers/suffix.json",
+    "css:config/util/index/default.json",
+    "css:config/util/logging/winston.json",
+    "css:config/util/representation-conversion/default.json",
+    "css:config/util/resource-locker/file.json",
+    "css:config/util/variables/default.json"
+  ],
+  "@graph": [
+    {
+      "comment": "A Solid server that stores its resources on disk."
+    },
+    {
+      "comment": "A ContentSelectionOperationHandler instance",
+      "@type": "ContentSelectionOperationHandler",
+      "@id": "urn:my-content-selection:core:ContentSelectionOperationHandler",
+      "store": { "@id": "urn:solid-server:default:ResourceStore" },
+      "baseUrl": { "@id": "urn:solid-server:default:variable:baseUrl" },
+      "activePaths": [
+        "^/sensor-[123]/(.*)",
+        "^/raspi/sensor/data$"
+      ],
+      "typeMappings": [
+        {
+          "ContentSelectionOperationHandler:_typeMappings_key": "text/html",
+          "ContentSelectionOperationHandler:_typeMappings_value": ".html"          
+        },
+        {
+          "ContentSelectionOperationHandler:_typeMappings_key": "text/csv",
+          "ContentSelectionOperationHandler:_typeMappings_value": ".csv"          
+        },
+        {
+          "ContentSelectionOperationHandler:_typeMappings_key": "text/(turtle|\\*)",
+          "ContentSelectionOperationHandler:_typeMappings_value": "ttl"          
+        },
+        {
+          "ContentSelectionOperationHandler:_typeMappings_key": "application/json(.*)",
+          "ContentSelectionOperationHandler:_typeMappings_value": ".json"          
+        },
+        {
+          "ContentSelectionOperationHandler:_typeMappings_key": "\\*/\\*",
+          "ContentSelectionOperationHandler:_typeMappings_value": ".ttl"          
+        }
+      ]
+    },
+    {
+      "@type": "Override",
+      "overrideInstance": { "@id": "urn:solid-server:default:OperationHandler" },
+      "overrideParameters": {
+        "@type": "WaterfallHandler",
+        "handlers": [
+          { 
+            "@id": "urn:my-content-selection:core:ContentSelectionOperationHandler" 
+          },
+          {
+            "@type": "GetOperationHandler",
+            "store": { "@id": "urn:solid-server:default:ResourceStore" },
+            "eTagHandler": { "@id": "urn:solid-server:default:ETagHandler" }
+          },
+          {
+            "@type": "PostOperationHandler",
+            "store": { "@id": "urn:solid-server:default:ResourceStore" }
+          },
+          {
+            "@type": "PutOperationHandler",
+            "store": { "@id": "urn:solid-server:default:ResourceStore" },
+            "metadataStrategy": { "@id": "urn:solid-server:default:MetadataStrategy" }
+          },
+          {
+            "@type": "DeleteOperationHandler",
+            "store": { "@id": "urn:solid-server:default:ResourceStore" }
+          },
+          {
+            "@type": "HeadOperationHandler",
+            "store": { "@id": "urn:solid-server:default:ResourceStore" },
+            "eTagHandler": { "@id": "urn:solid-server:default:ETagHandler" }
+          },
+          {
+            "@type": "PatchOperationHandler",
+            "store": { "@id": "urn:solid-server:default:ResourceStore" }
+          },
+          {
+            "@type": "StaticThrowHandler",
+            "error": { "@type": "MethodNotAllowedHttpError" }
+          }     
+        ]
+      }
+    }
+  ]
+}

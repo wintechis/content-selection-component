@@ -29,7 +29,7 @@ const redirectErrorFactories: Record<301 | 302 | 303 | 307 | 308, (location: str
 /* eslint-enable ts/naming-convention */
 
 /**
- * Handler that redirects to specified file extensions 
+ * HttpHandler that redirects to specified file extensions 
  * based on the MIME types in the request's 'accept' header
  * for specified server paths.
  */
@@ -78,7 +78,7 @@ export class ContentSelectionRedirectHttpHandler extends HttpHandler {
       throw new MethodNotAllowedHttpError(['GET'], 'Content selection redirect only for GET requests.');
     }
 
-    // Condition 3: only specified paths
+    // Condition 2: only specified paths
     // Retrieve target relative to base URL
     const target = await getRelativeUrl(this.baseUrl, request, this.targetExtractor);
     // Match against specified paths
@@ -86,12 +86,12 @@ export class ContentSelectionRedirectHttpHandler extends HttpHandler {
       throw new NotImplementedHttpError(`No redirect configured for ${target}`);
     }
 
-    // Condition 4: only files/paths without extension
+    // Condition 3: only files/paths without extension
     if (!request.url || request.url.endsWith('/') || this.hasFileExtension(request.url)) {
       throw new BadRequestHttpError('Content selection redirect only for files without extensions.');
     }
 
-    // // Condition 5: only if match between accept header and type mappings
+    // // Condition 4: only if match between accept header and type mappings
     // await this.findRedirect(request);
   }
 

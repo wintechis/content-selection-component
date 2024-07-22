@@ -17,7 +17,7 @@
   },
   "scripts": {
     "start": "community-solid-server -c config/contentselectionredirect-file.json -f .data -m .",
-    "start-partial": "community-solid-server -c @css:config/file.json contentselectionredirect-file-partial.json -f .data -m .",
+    "start-2": "community-solid-server -c config/contentselection-file-override.json -f .data -m .",
     "build": "npm run build:ts && npm run build:components",
     "build:components": "componentsjs-generator -s src -c dist/components -i .componentsignore -r content-selection",
     "build:ts": "tsc",
