@@ -33,7 +33,7 @@ const redirectErrorFactories: Record<301 | 302 | 303 | 307 | 308, (location: str
  * based on the MIME types in the request's 'accept' header
  * for specified server paths.
  */
-export class ContentSelection extends HttpHandler {
+export class ContentSelectionRedirectHttpHandler extends HttpHandler {
   private readonly logger = getLoggerFor(this);
   private readonly activePaths: RegExp[];
   private readonly typeMappings: {

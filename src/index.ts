@@ -1,1 +1,1 @@
-export * from './ContentSelection'
+export * from './ContentSelectionRedirectHttpHandler'
