@@ -21,18 +21,22 @@
     "build": "npm run build:ts && npm run build:components",
     "build:components": "componentsjs-generator -s src -c dist/components -i .componentsignore -r content-selection",
     "build:ts": "tsc",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "test": "jest"
   },
   "files": [
     "dist",
     "config"
   ],
   "dependencies": {
-    "@solid/community-server": "^7.0.3"
+    "@solid/community-server": "^7.1.0"
   },
   "devDependencies": {
     "@tsconfig/node18": "^18.2.2",
+    "@types/jest": "^29.5.12",
     "componentsjs-generator": "^3.1.2",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
     "typescript": "^5.3.3"
   },
   "license": "DontTouchMyGarbage"
