@@ -2,9 +2,7 @@ import { DataFactory } from 'n3';
 import type {
   ResourceStore, 
   ResponseDescription, 
-  OperationHandlerInput,
-  ValuePreferences,
-  RepresentationPreferences
+  OperationHandlerInput
 } from '@solid/community-server';
 import {
   getLoggerFor,
@@ -14,6 +12,7 @@ import {
   SOLID_HTTP
 } from '@solid/community-server';
 import { NotAcceptableHttpError } from './NotAcceptableHttpError';
+import * as csutil from './contentselection-util';
 
 /**
  * Handles GET {@link Operation}s based on the requested content-type.
@@ -50,7 +49,7 @@ export class ContentSelectionOperationHandler extends OperationHandler {
   }
 
   public async canHandle({ operation }: OperationHandlerInput): Promise<void> {
-    const relpath = this.getRelativePath(operation.target.path, this.baseUrl);
+    const relpath = csutil.getRelativePath(operation.target.path, this.baseUrl);
 
     // Condition 1: only HTTP GET
     if (operation.method !== 'GET') {
@@ -63,7 +62,7 @@ export class ContentSelectionOperationHandler extends OperationHandler {
     }
 
     // Condition 3: only files/paths without extension
-    if (relpath.endsWith('/') || this.hasFileExtension(relpath)) {
+    if (relpath.endsWith('/') || csutil.hasFileExtension(relpath)) {
       throw new NotImplementedHttpError('Content selection only for files without extensions.');
     }
 
@@ -73,18 +72,13 @@ export class ContentSelectionOperationHandler extends OperationHandler {
     } 
   }
 
-  private getRelativePath(path: string, baseUrl: string) {
-    const baseUrlWithoutTrailingSlash = this.baseUrl.replace(/\/+$/,'');
-    return path.replace(baseUrlWithoutTrailingSlash,'');
-  }
-
-  private hasFileExtension(url: string): Boolean {
-    return url.substring(url.lastIndexOf('/')+1).includes('.');
-  }
-
   public async handle({ operation }: OperationHandlerInput): Promise<ResponseDescription> {
     // Find match between accept header and type mappings
-    const result = this.matchWithTypeMappings(this.getPreferencesTypes(operation.preferences));
+    const result = csutil.matchWithTypeMappings(operation.preferences, this.typeMappings);
+    if (!result) {
+      throw new NotAcceptableHttpError(`No type mapping configured for 
+        '${Object.keys(operation.preferences?.type || {}).join(',')}'`);
+    }
 
     // Create new ResourceIdentifier instance
     const newIdentifier = { 
@@ -108,43 +102,6 @@ export class ContentSelectionOperationHandler extends OperationHandler {
         throw error;
       }
     }
-  }
-
-  private getPreferencesTypes(preferences: RepresentationPreferences): ValuePreferences {
-    const DEFAULT_MIME_TYPE = {'*/*': 1};
-    return preferences.type !== undefined ? preferences.type : DEFAULT_MIME_TYPE;
-  }
-
-  private matchWithTypeMappings(acceptTypes: ValuePreferences) {
-    let result: { 
-      match: RegExpMatchArray, 
-      fileExtension: string 
-    } | undefined = undefined;
-
-    // hack to keep order (Object.keys reverses the order in Node?)
-    // caution: order of object keys depends on the implementation
-    const acceptTypesList = Object.keys(acceptTypes).reverse();
-
-    // Loop over accepted types in the request
-    for (let i = 0; i < acceptTypesList.length; i++) {
-      const acceptType = acceptTypesList[i];
-      // Loop over configured type mappings
-      for (const { mimeType, fileExtension } of this.typeMappings) {
-        const match = mimeType.exec(acceptType);
-        if (match) {
-          result = { match, fileExtension };
-          break;
-        }
-      }
-    }
-
-    // Error if no matches at all
-    if (!result) {
-      throw new NotAcceptableHttpError(
-        `No type mapping configured for '${acceptTypesList.join(',')}'`);
-    }
-
-    return result;
   }
 
 }
