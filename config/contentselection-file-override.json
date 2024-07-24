@@ -64,7 +64,7 @@
           "ContentSelectionOperationHandler:_typeMappings_value": "ttl"          
         },
         {
-          "ContentSelectionOperationHandler:_typeMappings_key": "application/json(.*)",
+          "ContentSelectionOperationHandler:_typeMappings_key": "application/(ld\\+)?json",
           "ContentSelectionOperationHandler:_typeMappings_value": ".json"          
         },
         {

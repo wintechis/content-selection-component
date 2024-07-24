@@ -60,7 +60,7 @@ describe('ContentSelection-Redirect Integration Test', (): void => {
     expect(responseHTMLRequest.headers.get('location')).toBe(joinUrl(serverUrl, activePath + '.html'));
     // JSON
     const responseJSONRequest = await fetch(joinUrl(serverUrl, activePath), {
-      headers: { 'accept': 'text/html;q=0.8,application/json+ld' },
+      headers: { 'accept': 'text/html;q=0.8,application/ld+json' },
       redirect: 'manual'
     });
     expect(responseJSONRequest.status).toBe(303);

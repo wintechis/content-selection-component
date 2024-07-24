@@ -8,7 +8,7 @@ describe('ContentSelection Utilities Unit Test', (): void => {
     { mimeType: /text\/html/i, fileExtension: '.html' },
     { mimeType: /text\/csv/i, fileExtension: '.csv' },
     { mimeType: /text\/(turtle|\*)/i, fileExtension: '.ttl' },
-    { mimeType: /application\/json(.*)/i, fileExtension: '.json' },
+    { mimeType: /application\/(ld\+)?json/i, fileExtension: '.json' },
     { mimeType: /\*\/\*/i, fileExtension: '.ttl' }
   ];
 

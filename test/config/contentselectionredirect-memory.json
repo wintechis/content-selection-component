@@ -59,7 +59,7 @@
           "ContentSelectionRedirectHttpHandler:_typeMappings_value": "ttl"          
         },
         {
-          "ContentSelectionRedirectHttpHandler:_typeMappings_key": "application/json(.*)",
+          "ContentSelectionRedirectHttpHandler:_typeMappings_key": "application/(ld\\+)?json",
           "ContentSelectionRedirectHttpHandler:_typeMappings_value": ".json"          
         },
         {

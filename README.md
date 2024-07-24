@@ -43,6 +43,7 @@ CURL example: `curl -v -H 'accept: text/html' http://localhost:3000/sensor-1/dat
 
 Conceptual:
 * Consider [Mapping between HTTP URLs and filenames on a server](https://www.w3.org/DesignIssues/HTTPFilenameMapping.html) by TimBL
+  * [ExtensionBasedMapper](https://github.com/CommunitySolidServer/CommunitySolidServer/blob/main/src/storage/mapping/ExtensionBasedMapper.ts) maps URLs to files with extensions
 * Remove limitation to GET requests
 * Behavior if no specific content type is requested by the user
   * Currently: type mapping should include mapping for default `*/*`
