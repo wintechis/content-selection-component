@@ -68,6 +68,7 @@
         }
       ],
       "statusCode": "303",
+      "onlyRedirectOnMatch": true,
       "baseUrl": { "@id": "urn:solid-server:default:variable:baseUrl" },
       "targetExtractor": { "@id": "urn:solid-server:default:TargetExtractor" },
       "responseWriter": { "@id": "urn:solid-server:default:ResponseWriter" }

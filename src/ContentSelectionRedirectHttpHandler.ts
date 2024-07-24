@@ -48,6 +48,7 @@ export class ContentSelectionRedirectHttpHandler extends HttpHandler {
    * @param targetExtractor - To extract the target from the request.
    * @param typeMappings - A mapping between MIME type RegEx and file extensions.
    * @param statusCode - Desired 30x redirection code (defaults to 307).
+   * @param onlyRedirectOnMatch - Flag that decides if a redirect happens only on a type match (false by default).
    * @param responseWriter - To write the redirect to the response.
    */
   public constructor(
@@ -56,6 +57,7 @@ export class ContentSelectionRedirectHttpHandler extends HttpHandler {
     private readonly targetExtractor: TargetExtractor,
     typeMappings: Record<string, string>,
     private readonly statusCode: 301 | 302 | 303 | 307 | 308 = 307,
+    private readonly onlyRedirectOnMatch: Boolean = false,
     private readonly responseWriter: ResponseWriter,
   ) {
     super();
@@ -90,8 +92,10 @@ export class ContentSelectionRedirectHttpHandler extends HttpHandler {
       throw new BadRequestHttpError('Content selection redirect only for files without extensions.');
     }
 
-    // // Condition 4: only if match between accept header and type mappings
-    // await this.findRedirect(request);
+    // Condition 4: (optionally) only if match between accept header and type mappings
+    if (this.onlyRedirectOnMatch) {
+      await this.findRedirect(request);
+    }
   }
 
   public async handle({ request, response }: HttpHandlerInput): Promise<void> {

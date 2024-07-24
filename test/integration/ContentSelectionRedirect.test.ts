@@ -69,6 +69,8 @@ describe('ContentSelection-Redirect Integration Test', (): void => {
   });
 
   it('returns 406 on missing type mappings.', async(): Promise<void> => {
+    // if onlyRedirectOnMatch = false -> 406
+    // (if onlyRedirectOnMatch = true -> 404)
     const activePath = '/sensor-1/data';    
     const responseHTMLRequest = await fetch(joinUrl(serverUrl, activePath), {
       headers: { 'accept': 'application/xml' },
