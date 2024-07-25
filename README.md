@@ -15,7 +15,7 @@ Example: GET 'text/html' from /sensor-1/data --> 303 location: /sensor-1/data.ht
 
 ### ContentSelectionOperationHandler
 
-[ContentSelectionOperationHandler](./src/ContentSelectionOperationHandler.ts) directly returns the resource file that best matches the requested content type. The component is only active on specified paths and uses the specified type mappings to determine a URI with file extension which is then loaded from the ResourceStore. ContentSelectionOperationHandler extends the abstract [OperationHandler](https://communitysolidserver.github.io/CommunitySolidServer/7.x/docs/classes/OperationHandler.html) class similar to the [GetOperationHandler](https://communitysolidserver.github.io/CommunitySolidServer/7.x/docs/classes/GetOperationHandler.html).
+[ContentSelectionOperationHandler](./src/ContentSelectionOperationHandler.ts) directly delivers the resource file that best matches the requested content type. The component is only active on specified paths and uses the specified type mappings to determine a URI with file extension which is then loaded from the ResourceStore. ContentSelectionOperationHandler extends the abstract [OperationHandler](https://communitysolidserver.github.io/CommunitySolidServer/7.x/docs/classes/OperationHandler.html) class similar to the [GetOperationHandler](https://communitysolidserver.github.io/CommunitySolidServer/7.x/docs/classes/GetOperationHandler.html).
 
 Conditions under which the [ContentSelectionOperationHandler](./src/ContentSelectionOperationHandler.ts) is active:
 1. only HTTP GET
@@ -31,13 +31,23 @@ Install dependencies (CSS, components.js, Jest): `npm i`
 
 Transpile TypeScript: `npm run build`
 
-Start the ContentSelectionRedirectHttpHandler: `npm start`
+Start the ContentSelectionRedirectHttpHandler: `npm run start:redirect`
 
-Start the ContentSelectionOperationHandler: `npm start-2`
+Start the ContentSelectionOperationHandler: `npm run start:deliver`
 
 Run the tests (for ContentSelectionRedirectHttpHandler): `npm test`
 
 CURL example: `curl -v -H 'accept: text/html' http://localhost:3000/sensor-1/data`
+
+#### Known Issues
+
+* In general, the project can be built on Linux and Windows but components.js works better on Linux.
+  * Importing the config `css:config/ldp/authorization/allow-all.json` runs on both OS whereas `css:config/ldp/authorization/webacl.json` only starts on Linux.
+  * On Windows, components.js aborts with an error `Invalid term IRI WebAclMetadataCollector`.
+
+* Flexible config that can be combined with any other CSS config
+  * Possible if CSS upgrades the componentsjs version to v5.5 or v6.0 (next major release)
+  * Current workaround: add componentsjs@5.5.1 to dependencies of this package
 
 ### Future Work
 
@@ -54,5 +64,3 @@ Technical:
   * Using the [mime-types](https://www.npmjs.com/package/mime-types) module that CSS uses
   * Derived from Apache httpd [mime.types](https://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types)
 * Publish components as NPM package
-* Flexible config that can be combined with any other CSS config
-  * Possible if CSS upgrades the componentsjs version to ^6.0

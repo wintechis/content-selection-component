@@ -1,0 +1,55 @@
+{
+  "@context": [
+    "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^7.0.0/components/context.jsonld",
+    "https://linkedsoftwaredependencies.org/bundles/npm/content-selection-module/^1.0.0/components/context.jsonld"
+  ],
+  "@graph": [
+    {
+      "comment": "A ContentSelectionOperationHandler instance with example properties",
+      "@type": "ContentSelectionOperationHandler",
+      "@id": "urn:my-content-selection:core:ContentSelectionOperationHandler",
+      "store": { "@id": "urn:solid-server:default:ResourceStore" },
+      "baseUrl": { "@id": "urn:solid-server:default:variable:baseUrl" },
+      "activePaths": [
+        "^/sensor-[123]/(.*)",
+        "^/raspi/sensor/data$"
+      ],
+      "typeMappings": [
+        {
+          "ContentSelectionOperationHandler:_typeMappings_key": "text/html",
+          "ContentSelectionOperationHandler:_typeMappings_value": ".html"          
+        },
+        {
+          "ContentSelectionOperationHandler:_typeMappings_key": "text/csv",
+          "ContentSelectionOperationHandler:_typeMappings_value": ".csv"          
+        },
+        {
+          "ContentSelectionOperationHandler:_typeMappings_key": "text/(turtle|\\*)",
+          "ContentSelectionOperationHandler:_typeMappings_value": "ttl"          
+        },
+        {
+          "ContentSelectionOperationHandler:_typeMappings_key": "application/(ld\\+)?json",
+          "ContentSelectionOperationHandler:_typeMappings_value": ".json"          
+        },
+        {
+          "ContentSelectionOperationHandler:_typeMappings_key": "\\*/\\*",
+          "ContentSelectionOperationHandler:_typeMappings_value": ".ttl"          
+        }
+      ]
+    },
+    {
+      "comment": "requires at least components.js@5.5",
+      "@id": "urn:my-content-selection:OperationHandlerOverride",
+      "@type": "Override",
+      "overrideInstance": { "@id": "urn:solid-server:default:OperationHandler" },
+      "overrideSteps": [
+        {
+          "@type": "OverrideListInsertAt",
+          "overrideParameter": { "@id": "WaterfallHandler:_handlers" },
+          "overrideTarget": 0,
+          "overrideValue": { "@id": "urn:my-content-selection:core:ContentSelectionOperationHandler" }
+        }
+      ]
+    }
+  ]
+}
