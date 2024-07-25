@@ -1,8 +1,8 @@
 {
   "name": "content-selection-module",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "smeckler",
-  "description": "A minimal example of a repository containing an injectable Community Solid Server module",
+  "description": "two proof-of-concept CSS components for content selection",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "lsd:module": "https://linkedsoftwaredependencies.org/bundles/npm/content-selection-module",
@@ -21,7 +21,7 @@
     "start:redirect:2": "community-solid-server -c @css:config/file.json config/contentselection-redirect.json -f .data -m .",
     "start:deliver": "community-solid-server -c config/base/file-allowall.json config/contentselection-deliver.json -f .data -m .",
     "build": "npm run build:ts && npm run build:components",
-    "build:components": "componentsjs-generator -s src -c dist/components -i .componentsignore -r content-selection",
+    "build:components": "componentsjs-generator -s src -c dist/components -i .componentsignore -r content-selection-module",
     "build:ts": "tsc",
     "prepare": "npm run build",
     "test": "jest"
@@ -42,5 +42,5 @@
     "ts-jest": "^29.1.2",
     "typescript": "^5.3.3"
   },
-  "license": "DontTouchMyGarbage"
+  "license": "UseAtOwnRisk"
 }

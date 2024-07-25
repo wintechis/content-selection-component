@@ -11,7 +11,7 @@ This repo contains two custom 'content-selection' components for the [Community 
 3. only file URIs without extension
 4. (optionally) only if match between accept header and type mappings
 
-Example: GET 'text/html' from /sensor-1/data --> 303 location: /sensor-1/data.html
+Example: `GET 'text/html' from /sensor-1/data` -> `303 location: /sensor-1/data.html`
 
 ### ContentSelectionOperationHandler
 
@@ -24,30 +24,6 @@ Conditions under which the [ContentSelectionOperationHandler](./src/ContentSelec
 4. only if the target resource does not exist
 
 The ContentSelectionOperationHandler incompletely imitates the behavior of the Apache Module [mod_negotiation](https://httpd.apache.org/docs/2.4/mod/mod_negotiation.html).
-
-### Setup
-
-Install dependencies (CSS, components.js, Jest): `npm i`
-
-Transpile TypeScript: `npm run build`
-
-Start the ContentSelectionRedirectHttpHandler: `npm run start:redirect`
-
-Start the ContentSelectionOperationHandler: `npm run start:deliver`
-
-Run the tests (for ContentSelectionRedirectHttpHandler): `npm test`
-
-CURL example: `curl -v -H 'accept: text/html' http://localhost:3000/sensor-1/data`
-
-#### Known Issues
-
-* In general, the project can be built on Linux and Windows but components.js works better on Linux.
-  * Importing the config `css:config/ldp/authorization/allow-all.json` runs on both OS whereas `css:config/ldp/authorization/webacl.json` only starts on Linux.
-  * On Windows, components.js aborts with an error `Invalid term IRI WebAclMetadataCollector`.
-
-* Flexible config that can be combined with any other CSS config
-  * Possible if CSS upgrades the componentsjs version to v5.5 or v6.0 (next major release)
-  * Current workaround: add componentsjs@5.5.1 to dependencies of this package
 
 ### Future Work
 
@@ -63,4 +39,38 @@ Technical:
 * Default type mapings
   * Using the [mime-types](https://www.npmjs.com/package/mime-types) module that CSS uses
   * Derived from Apache httpd [mime.types](https://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types)
-* Publish components as NPM package
+
+### Setup
+
+Install dependencies (CSS, components.js, Jest): `npm i`
+
+Transpile TypeScript: `npm run build`
+
+Start the ContentSelectionRedirectHttpHandler: `npm run start:redirect`
+
+Start the ContentSelectionOperationHandler: `npm run start:deliver`
+
+Run the tests (for ContentSelectionRedirectHttpHandler): `npm test`
+
+CURL example: `curl -v -H 'accept: text/html' http://localhost:3000/sensor-1/data`
+
+#### Use as NPM package
+
+Clone CSS repo: `git clone git@github.com:CommunitySolidServer/CommunitySolidServer.git`
+
+Install from [NPM](https://www.npmjs.com/package/content-selection-module): `npm i content-selection-module`
+
+Start CSS with a base and a content-selection config:  
+`node ./bin/server.js -c config/file-noacl.json node_modules/content-selection-module/config/contentselection-redirect.json -f .data` or `npm start -- -c config/file-noacl.json ...`
+
+> __Bug?:__ Logs from the content-selection-module are not shown
+
+#### Known Issues
+
+* In general, the project can be built on Linux and Windows but components.js works better on Linux.
+  * Importing the config `css:config/ldp/authorization/allow-all.json` runs on both OS whereas `css:config/ldp/authorization/webacl.json` only starts on Linux.
+  * On Windows, components.js aborts with an error `Invalid term IRI WebAclMetadataCollector`.
+
+* Flexible config that can be combined with any other CSS config
+  * Possible if CSS upgrades the componentsjs version to v5.5 or v6.0 (next major release)
+  * Current workaround: add componentsjs@5.5.1 to dependencies of this package

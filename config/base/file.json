@@ -35,7 +35,7 @@
   ],
   "@graph": [
     {
-      "comment": "A Solid server that stores its resources on disk. (webacl config causes a problem on Windows)"
+      "comment": "A Solid server that stores its resources on disk."
     }
   ]
 }
