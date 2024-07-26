@@ -1,6 +1,6 @@
 {
   "name": "content-selection-module",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "smeckler",
   "description": "two proof-of-concept CSS components for content selection",
   "main": "./dist/index.js",
@@ -42,5 +42,5 @@
     "ts-jest": "^29.1.2",
     "typescript": "^5.3.3"
   },
-  "license": "UseAtOwnRisk"
+  "license": "AGPL-3.0-or-later"
 }
