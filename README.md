@@ -58,7 +58,7 @@ CURL example: `curl -v -H 'accept: text/html' http://localhost:3000/sensor-1/dat
 
 ### Use as NPM package
 
-#### Variant 1: CDD dependecy (recommended)
+#### Variant 1: CSS dependency (recommended)
 
 Create a package.json with CSS and content-selection-module as dependencies
 ```javascript
@@ -70,13 +70,15 @@ Create a package.json with CSS and content-selection-module as dependencies
 }
 ```
 
-_Recommended_: Add newer version componentsjs to enable the use of more modular configurations: add `"componentsjs": "^5.5.1` to the dependencies above
+_Recommended_: Add newer version of componentsjs to enable the use of more modular configurations: add `"componentsjs": "^5.5.1` to the dependencies above
 
-Install deps: `npm i`
+Install dependencies: `npm i`
 
-_With componentsjs@5.5.1 or newer_: `community-solid-server -c @css:config/file.json node_modules/content-selection-module/config/contentselection-redirect.json -f .data -m .`
+_With componentsjs@5.5.1 or newer_:  Start CSS with a base config and a content-selection config:
+`community-solid-server -c @css:config/file.json node_modules/content-selection-module/config/contentselection-redirect.json -f .data -m .`
 
-_With older componentsjs_: Start with the complete config (if componentsjs@5.4 or older): `community-solid-server -c node_modules/content-selection-module/config/complete/contentselectionredirect-file.json -f .data -m .`
+_With older componentsjs_: Start CSS with a complete config:
+`community-solid-server -c node_modules/content-selection-module/config/complete/contentselectionredirect-file.json -f .data -m .`
 
 > The argument `-m .` is important for the components initialization, see [CSS parameters](https://communitysolidserver.github.io/CommunitySolidServer/latest/usage/starting-server/#configuring-the-server).
 
@@ -87,13 +89,14 @@ Clone CSS repo: `git clone git@github.com:CommunitySolidServer/CommunitySolidSer
 
 Add [content-selection-module from NPM](https://www.npmjs.com/package/content-selection-module): `npm i content-selection-module`
 
-_Recommended_: Install the newer version of componentsjs to enable the use of more modular configurations: `npm i componentsjs@5.5.1` or add `"componentsjs": "^5.5.1` to the dependencies in the [package.json](package.json)
+_Recommended_: Install the newer version of componentsjs to enable the use of more modular configurations:
+`npm i componentsjs@5.5.1` or add `"componentsjs": "^5.5.1` to the dependencies in the [package.json](package.json)
 
-Install CSS deps: `npm i`
+Install dependencies: `npm i`
 
-_With componentsjs@5.5.1 or newer_: Start CSS with a base and a content-selection config:  
-`node ./bin/server.js -c config/file.json node_modules/content-selection-module/config/contentselection-redirect.json -f .data` or  
-`npm start -- -c config/...`
+_With componentsjs@5.5.1 or newer_: Start CSS with a base and a content-selection config:
+`node ./bin/server.js -c config/file.json node_modules/content-selection-module/config/contentselection-redirect.json -f .data`  
+(or `npm start -- -c config/...`)
 
 _With older componentsjs_: Start CSS with a complete config:
 `node ./bin/server.js -c node_modules/content-selection-module/config/complete/contentselectionredirect-file.json -f .data`
