@@ -54,7 +54,7 @@ Start the ContentSelectionOperationHandler: `npm run start:deliver`
 
 Run the tests (for ContentSelectionRedirectHttpHandler): `npm test`
 
-CURL example: `curl -v -H 'accept: text/html' http://localhost:3000/sensor-1/data`
+CURL example: `curl -v -L -H 'accept: text/html' http://localhost:3000/sensor-1/data`
 
 ### Use as NPM package
 
